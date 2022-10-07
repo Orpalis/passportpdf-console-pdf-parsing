@@ -9,7 +9,7 @@ namespace BarcodeExtraction
     {
         static async Task Main(string[] args)
         {
-            GlobalConfiguration.ApiKey = "FF717E50-D384-4D6C-8883-6CEFB3751888";
+            GlobalConfiguration.ApiKey = "YOUR-PASSPORT-CODE";
 
             PassportManagerApi apiManager = new();
             PassportPDFPassport passportData = await apiManager.PassportManagerGetPassportInfoAsync(GlobalConfiguration.ApiKey);
