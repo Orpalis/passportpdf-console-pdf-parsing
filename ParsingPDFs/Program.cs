@@ -12,7 +12,7 @@ namespace BarcodeExtraction
             GlobalConfiguration.ApiKey = "FF717E50-D384-4D6C-8883-6CEFB3751888";
 
             PassportManagerApi apiManager = new();
-            var passportData = await apiManager.PassportManagerGetPassportInfoAsync(GlobalConfiguration.ApiKey);
+            PassportPDFPassport passportData = await apiManager.PassportManagerGetPassportInfoAsync(GlobalConfiguration.ApiKey);
 
             if (passportData == null)
             {
@@ -23,7 +23,7 @@ namespace BarcodeExtraction
                 throw new ApiException("The Passport number given not active, please go to your PassportPDF dashboard and active your plan.");
             }
 
-            var uri = "https://passportpdfapi.com/test/invoice_with_barcode.pdf";
+            string uri = "https://passportpdfapi.com/test/invoice_with_barcode.pdf";
             
             DocumentApi api = new();
 
@@ -49,7 +49,7 @@ namespace BarcodeExtraction
             PdfExtractTextResponse extractTextResponse = pdfApi.ExtractTextAsync(new PdfExtractTextParameters(document.FileId, "*")).Result;
 
             Console.WriteLine("Text extracted :");
-            foreach(var page in extractTextResponse.ExtractedText)
+            foreach (PageText page in extractTextResponse.ExtractedText)
             {
                 Console.WriteLine($"======== Page {page.PageNumber} ========");
                 Console.WriteLine(page.ExtractedText);
