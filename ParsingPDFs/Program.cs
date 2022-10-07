@@ -2,10 +2,10 @@
 using PassportPDF.Client;
 using PassportPDF.Model;
 
-namespace BarcodeExtraction
+namespace TextExtraction
 {
 
-    public class BarcodeExtractor
+    public class TextExtractor
     {
         static async Task Main(string[] args)
         {
