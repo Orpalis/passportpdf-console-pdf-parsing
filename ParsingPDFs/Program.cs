@@ -1,33 +1,60 @@
 ﻿using PassportPDF.Api;
 using PassportPDF.Client;
-
+using PassportPDF.Model;
 
 namespace BarcodeExtraction
 {
 
     public class BarcodeExtractor
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            GlobalConfiguration.ApiKey = "YOUR-PASSPORT-CODE";
-            DocumentApi api = new();
+            GlobalConfiguration.ApiKey = "FF717E50-D384-4D6C-8883-6CEFB3751888";
 
-            var uri = "https://passportpdfapi.com/test/invoice_with_barcode.pdf";
-            var document = api.DocumentLoadFromURIAsync(new PassportPDF.Model.LoadDocumentFromURIParameters(uri)).Result;
+            PassportManagerApi apiManager = new();
+            var passportData = await apiManager.PassportManagerGetPassportInfoAsync(GlobalConfiguration.ApiKey);
 
-            PDFApi pdfApi = new();
-            var ocrPdfResponse = pdfApi.OCRAsync(new PassportPDF.Model.PdfOCRParameters(document.FileId, "*")).Result;
-
-            var extractTextResponse = pdfApi.ExtractTextAsync(new PassportPDF.Model.PdfExtractTextParameters(document.FileId, "*")).Result;
-
-            var documentPages = extractTextResponse.ExtractedText;
-
-            foreach(var page in documentPages)
+            if (passportData == null)
             {
-                Console.WriteLine("Page number : {0}", page.PageNumber);
-                Console.WriteLine("Extracted text : {0}", page.ExtractedText);
+                throw new ApiException("The Passport number given is invalid, please set a valid passport number and try again.");
+            }
+            else if (passportData.IsActive is false)
+            {
+                throw new ApiException("The Passport number given not active, please go to your PassportPDF dashboard and active your plan.");
             }
 
+            var uri = "https://passportpdfapi.com/test/invoice_with_barcode.pdf";
+            
+            DocumentApi api = new();
+
+            Console.WriteLine("Loading document into PassportPDF...");
+            DocumentLoadResponse document = await api.DocumentLoadFromURIAsync(new LoadDocumentFromURIParameters(uri));
+            Console.WriteLine("Document loaded.");
+
+            PDFApi pdfApi = new();
+
+            Console.WriteLine("Launching text recognition process...");
+            PdfOCRResponse ocrPdfResponse = await pdfApi.OCRAsync(new PdfOCRParameters(document.FileId, "*"));
+
+            if (ocrPdfResponse.Error is not null)
+            {
+                throw new ApiException(ocrPdfResponse.Error.ExtResultMessage);
+            }
+            else
+            {
+                Console.WriteLine("Text recognition process ended.");
+            }
+
+            Console.WriteLine("Start text extraction process...");
+            PdfExtractTextResponse extractTextResponse = pdfApi.ExtractTextAsync(new PdfExtractTextParameters(document.FileId, "*")).Result;
+
+            Console.WriteLine("Text extracted :");
+            foreach(var page in extractTextResponse.ExtractedText)
+            {
+                Console.WriteLine($"======== Page {page.PageNumber} ========");
+                Console.WriteLine(page.ExtractedText);
+                Console.WriteLine("========================");
+            }
         }
     }
 }
