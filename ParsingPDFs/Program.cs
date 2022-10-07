@@ -34,7 +34,11 @@ namespace BarcodeExtraction
             PDFApi pdfApi = new();
 
             Console.WriteLine("Launching text recognition process...");
-            PdfOCRResponse ocrPdfResponse = await pdfApi.OCRAsync(new PdfOCRParameters(document.FileId, "*"));
+            PdfOCRResponse ocrPdfResponse = await pdfApi.OCRAsync(new PdfOCRParameters(document.FileId, "*")
+            {
+                Language = "eng",
+                SkipPageWithText = false
+            });
 
             if (ocrPdfResponse.Error is not null)
             {
@@ -46,7 +50,10 @@ namespace BarcodeExtraction
             }
 
             Console.WriteLine("Start text extraction process...");
-            PdfExtractTextResponse extractTextResponse = pdfApi.ExtractTextAsync(new PdfExtractTextParameters(document.FileId, "*")).Result;
+            PdfExtractTextResponse extractTextResponse = await pdfApi.ExtractTextAsync(new PdfExtractTextParameters(document.FileId, "*")
+            {
+                TextExtractionMode = PdfExtractTextMode.WholePagePreserveLayout
+            });
 
             Console.WriteLine("Text extracted :");
             foreach (PageText page in extractTextResponse.ExtractedText)
